@@ -1,3 +1,13 @@
+# unbibium's changes
+
+With this fork, I'm trying to add some more ways to use Eliza as an object, including:
+* ability to change out the user interface
+* adding a sample user interface with speech recognition
+* ability to save memory and reload
+
+I may be writing a chatbot later that responds to certain commands, and falls back to Eliza if nothing
+is recognized.  At that point, I'll swap out the Eliza object with something else.
+
 # Eliza chatbot in Python
 
 Loosely based on Charles Hayden's version in Java, at http://chayden.net/eliza/Eliza.html. 
