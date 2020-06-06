@@ -26,7 +26,7 @@ class Decomp:
 
 
 class Eliza:
-    def __init__(self):
+    def __init__(self, memory=None):
         self.initials = []
         self.finals = []
         self.quits = []
@@ -34,9 +34,14 @@ class Eliza:
         self.posts = {}
         self.synons = {}
         self.keys = {}
-        self.memory = []
+        self.memory = memory if memory else list()
+        self.path = None
+
+    def __repr__(self):
+        return "%s(%r).load(%r)" % (self.__class__, self.memory, self.path)
 
     def load(self, path):
+        self.path = path
         key = None
         decomp = None
         with open(path) as file:
@@ -76,6 +81,7 @@ class Eliza:
                 elif tag == 'reasmb':
                     parts = content.split(' ')
                     decomp.reasmbs.append(parts)
+        return self # cheap chaining
 
     def _match_decomp_r(self, parts, words, results):
         if not parts and not words:
