@@ -3,9 +3,14 @@ from Recorder import record_audio, read_audio
 #from wit import Wit #6.0.0
 from chatters import Chatter
 import requests, json
+import speech_recognition as sr
+import time
 
 # TODO: use non-deprecated endpoint
 API_ENDPOINT = "https://api.wit.ai/speech"
+r = sr.Recognizer()
+r.pause_threshold = 0.1
+r.non_speaking_duration = 0
 
 class SpeechChatter(Chatter):
     def __init__(self, auth_token):
@@ -14,15 +19,17 @@ class SpeechChatter(Chatter):
         #TODO: improve help to set up auth token
         self.auth_token = auth_token
 
-    def run(self, bot, num_seconds = 5):
+    def run(self, bot):
         try:
-            AUDIO_FILENAME="fff.wav"
             while True:
                 # record audio of specified length in specified audio file
-                record_audio(num_seconds, AUDIO_FILENAME)
-                # reading audio
-                audio= read_audio(AUDIO_FILENAME)
-                result = self.recognize_bytes(audio)
+                with sr.Microphone() as source:
+                    audio = r.listen(source)
+                wav_audio = audio.get_wav_data(
+                            convert_rate=None if audio.sample_rate >= 8000 else 8000,  # audio samples must be at least 8 kHz
+                            convert_width=2  # audio samples should be 16-bit
+                        )
+                result = self.recognize_bytes(wav_audio)
                 try:
                     text = result['text']
                     print(">",text)
@@ -41,27 +48,12 @@ class SpeechChatter(Chatter):
                    'Content-Type': 'audio/wav'}
 
         # making an HTTP post request
+        start = time.time()
         resp = requests.post(API_ENDPOINT, headers = headers,
                                          data = audio)
-                                             
+        duration = time.time() - start
+        print(duration,"seconds to get response")
         # converting response content to JSON format
         data = json.loads(resp.content)
         return data
 
-    def recognize(self, audio_data):
-        """
-        Performs speech recognition on ``audio_data`` (an ``AudioData`` instance),
-        using the Wit.ai API and the key given in the constructor.
-
-        """
-        #assert isinstance(audio_data, AudioData), "Data must be audio data"
-
-        wav_data = audio_data.get_wav_data(
-            convert_rate=None if audio_data.sample_rate >= 8000 else 8000,  # audio samples must be at least 8 kHz
-            convert_width=2  # audio samples should be 16-bit
-            )
-        return self.api.speech(audio_data)
-
-    def reply(self, text):
-        # TODO: make it say stuff aloud
-        print("... \033[1m", text, "\033[0m")
