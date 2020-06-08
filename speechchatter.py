@@ -2,6 +2,7 @@
 from Recorder import record_audio, read_audio
 #from wit import Wit #6.0.0
 from chatters import Chatter
+import talkers
 import requests, json
 import speech_recognition as sr
 import time
@@ -13,11 +14,16 @@ r.pause_threshold = 0.1
 r.non_speaking_duration = 0
 
 class SpeechChatter(Chatter):
-    def __init__(self, auth_token):
+    def __init__(self, auth_token, talker=talkers._instance):
         if type(auth_token) != str or len(auth_token) < 10:
-            raise ValueError("invalid auth token")
+            raise TypeError("invalid auth token")
+        if type(talker) is talkers.Talker:
+            raise TypeError("passed abstract Talker instance")
+        if not(isinstance(talker, talkers.Talker)):
+            raise TypeError("expected Talker subclass, was " + talker.__class__.__name__)
         #TODO: improve help to set up auth token
         self.auth_token = auth_token
+        self.talker = talker
 
     def run(self, bot):
         try:
@@ -35,6 +41,7 @@ class SpeechChatter(Chatter):
                     print(">",text)
                     response = bot.respond(result['text'])
                     print("*", response)
+                    self.talker.say(response)
                 except KeyError:
                     print("> ???", result.keys())
                     if '_text' in result.keys():
