@@ -19,7 +19,7 @@ def progress(*args,**kwargs):
         print("\033[A", end='')  # UP
         sys.stdout.flush()
 
-class SpeechChatter(Chatter):
+class WitChatter(Chatter):
     def __init__(self, auth_token, talker=talkers._instance):
         if type(auth_token) != str or len(auth_token) < 10:
             raise TypeError("invalid auth token")
