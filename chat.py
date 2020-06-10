@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from chatters import TextChatter, ScriptChatter
-from speechchatter import SpeechChatter
+from witchatter import WitChatter
 from eliza import Eliza
 
 if __name__ == "__main__":
@@ -15,7 +15,12 @@ if __name__ == "__main__":
     if auth_token:
         parser.add_argument("-a", "--audio", action='store_true',
             help="Chat with mic and speaker")
-    parser.add_argument("-m", "--memory", 
+    parser.add_argument("-l", "--list-microphones", action='store_true',
+        help="List microphone numbers and names and exit.")
+    # TODO support --mic name
+    parser.add_argument("-m", "--mic", "--microphone",
+        help="Use microphone with given number")
+    parser.add_argument("-M", "--memory", 
         help="Saved memory file to use for Eliza")
     args = parser.parse_args()
     if args.memory:
@@ -32,10 +37,23 @@ if __name__ == "__main__":
     elif args.terminal:
         ux = TextChatter()
     elif args.audio:
-        if type(auth_token) != str or len(auth_token) < 10:
-            print("error: set environment string WIT_AUTH_TOKEN to a valid thingy")
-            sys.exit(3)
-        ux = SpeechChatter(auth_token)
+        micIndex = None
+        if args.mic is not None:
+            try:
+                micIndex = int(args.mic)
+            except ValueError:
+                from speech_recognition import Microphone
+                try:
+                    micIndex = Microphone.list_microphone_names().index(args.mic)
+                except ValueError:
+                    print("cannot find mic named", args.mic)
+                    sys.exit(4)
+        ux = WitChatter(auth_token, mic=micIndex)
+    elif args.list_microphones:
+        from speech_recognition import Microphone
+        for i, name in enumerate(Microphone.list_microphone_names()):
+            print(i,":", name)
+            sys.exit(0)
     else:
         parser.print_help()
         sys.exit(2)

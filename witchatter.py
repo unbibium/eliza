@@ -20,17 +20,24 @@ def progress(*args,**kwargs):
         sys.stdout.flush()
 
 class WitChatter(Chatter):
-    def __init__(self, auth_token, talker=talkers._instance):
-        if type(auth_token) != str or len(auth_token) < 10:
-            raise TypeError("invalid auth token")
+    def __init__(self, auth_token, talker=talkers._instance, mic=None):
+        if type(auth_token) != str:
+            raise TypeError("auth token is not a string")
+        elif len(auth_token) < 32:
+            raise ValueError("auth_token is wrong length")
         if type(talker) is talkers.Talker:
             raise TypeError("passed abstract Talker instance")
-        if not(isinstance(talker, talkers.Talker)):
+        if not isinstance(talker, talkers.Talker):
             raise TypeError("expected Talker subclass, was " + talker.__class__.__name__)
         #TODO: improve help to set up auth token
         self.auth_token = auth_token
         self.talker = talker
-        self.source = sr.Microphone()
+        if isinstance(mic, sr.Microphone):
+            self.source = mic
+        elif isinstance(mic, int) or mic is None:
+            self.source = sr.Microphone(mic)
+        else:
+            raise TypeError("mic parameter was neither number nor existing Microphone object")
 
     def run(self, bot):
         try:
