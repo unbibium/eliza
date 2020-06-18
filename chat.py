@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from chatters import TextChatter, ScriptChatter
-from witchatter import WitChatter
+from witchatter import WitChatter, WitTextChatter
 from eliza import Eliza
 
 if __name__ == "__main__":
@@ -13,6 +13,8 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--script", 
         help="Read input from SCRIPT and display to terminal")
     if wit_auth_token:
+        parser.add_argument("-w", "--wit", action='store_true',
+            help="Chat with terminal but show wit.ai response")
         parser.add_argument("-a", "--audio", action='store_true',
             help="Chat with mic and speaker")
         parser.add_argument("-l", "--list-microphones", action='store_true',
@@ -49,6 +51,8 @@ if __name__ == "__main__":
                     print("cannot find mic named", args.mic)
                     sys.exit(4)
         ux = WitChatter(wit_auth_token, mic=micIndex)
+    elif args.wit:
+        ux = WitTextChatter(wit_auth_token)
     elif args.list_microphones:
         from speech_recognition import Microphone
         for i, name in enumerate(Microphone.list_microphone_names()):

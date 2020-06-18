@@ -17,15 +17,20 @@ class Chatter:
 class TextChatter(Chatter):
     """
     Reads input from the terminal, and writes responses to the terminal.
+
+    defines listen() so that WitTextChatter can subclass it.
     """
     def __iter__(self):
         try:
             while True:
-                yield(input("> "))
+                yield(self.listen())
         except KeyboardInterrupt:
             print("^C")
         except EOFError:
             pass
+
+    def listen(self):
+        return input("> ")
 
     def say(self, response):
         print("*", response)

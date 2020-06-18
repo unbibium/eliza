@@ -1,11 +1,12 @@
 
 #from wit import Wit #6.0.0
-from chatters import Chatter
+from chatters import Chatter, TextChatter
 import talkers
 import requests, json, time, sys
 import speech_recognition as sr
 
-API_ENDPOINT = "https://api.wit.ai/speech"
+SPEECH_ENDPOINT = "https://api.wit.ai/speech"
+MESSAGE_ENDPOINT = "https://api.wit.ai/message"
 r = sr.Recognizer()
 # TODO: make configurable in a more sensical way
 r.pause_threshold = 0.2
@@ -77,11 +78,26 @@ class WitChatter(Chatter):
 
         # making an HTTP post request
         start = time.time()
-        resp = requests.post(API_ENDPOINT, headers = headers,
+        resp = requests.post(SPEECH_ENDPOINT, headers = headers,
                                          data = audio)
         duration = time.time() - start
         print("# %5.2f seconds to get response" % duration)
         # converting response content to JSON format
         data = json.loads(resp.content)
         return data
+
+class WitTextChatter(TextChatter):
+    def __init__(self, auth_token):
+        self.auth_token = auth_token
+
+    def listen(self):
+        # defining headers for HTTP request
+        headers = {'authorization': 'Bearer ' + self.auth_token,
+                   'Content-Type': 'application/json'}
+        line = super().listen()
+        resp = requests.get(MESSAGE_ENDPOINT, params={
+            "q": line
+            }, headers=headers)
+        print(resp.content)
+        return line
 
