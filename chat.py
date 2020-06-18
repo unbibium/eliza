@@ -6,20 +6,20 @@ from eliza import Eliza
 
 if __name__ == "__main__":
     import sys, os, argparse
-    auth_token = os.environ.get('WIT_AUTH_TOKEN')
+    wit_auth_token = os.getenv('WIT_AUTH_TOKEN')
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--terminal", action='store_true',
         help="Chat with terminal")
     parser.add_argument("-s", "--script", 
         help="Read input from SCRIPT and display to terminal")
-    if auth_token:
+    if wit_auth_token:
         parser.add_argument("-a", "--audio", action='store_true',
             help="Chat with mic and speaker")
-    parser.add_argument("-l", "--list-microphones", action='store_true',
-        help="List microphone numbers and names and exit.")
-    # TODO support --mic name
-    parser.add_argument("-m", "--mic", "--microphone",
-        help="Use microphone with given number")
+        parser.add_argument("-l", "--list-microphones", action='store_true',
+            help="List microphone numbers and names and exit.")
+        # TODO support --mic name
+        parser.add_argument("-m", "--mic", "--microphone",
+            help="Use microphone with given number")
     parser.add_argument("-M", "--memory", 
         help="Saved memory file to use for Eliza")
     args = parser.parse_args()
@@ -48,7 +48,7 @@ if __name__ == "__main__":
                 except ValueError:
                     print("cannot find mic named", args.mic)
                     sys.exit(4)
-        ux = WitChatter(auth_token, mic=micIndex)
+        ux = WitChatter(wit_auth_token, mic=micIndex)
     elif args.list_microphones:
         from speech_recognition import Microphone
         for i, name in enumerate(Microphone.list_microphone_names()):
